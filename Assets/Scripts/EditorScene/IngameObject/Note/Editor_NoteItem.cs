@@ -1,0 +1,194 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+using UnityEngine;
+
+
+public class Editor_NoteItem : MonoBehaviour
+{
+    private Guid m_noteID;
+
+    private StageData.NoteData.NoteType m_curNoteType;
+
+    [SerializeField] private Editor_Note_RedAndBlueNote m_redAndBlueNote;
+    [SerializeField] private Editor_Note_GreenNote m_greenNote;
+
+
+    public void Awake()
+    {
+
+    }
+
+    internal Guid NoteID
+    {
+        get
+        {
+            return m_noteID;
+        }
+    }
+
+    internal Editor_Note_RedAndBlueNote RedAndBlueNoteItem
+    {
+        get
+        {
+            return m_redAndBlueNote;
+        }
+    }
+    internal Editor_Note_GreenNote GreenNoteItem
+    {
+        get
+        {
+            return m_greenNote;
+        }
+    }
+
+    #region Utils
+    internal void RenderNoteItem(in Guid noteID)
+    {
+        m_noteID = noteID;
+
+        switch (StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].CurNoteType)
+        {
+            case StageData.NoteData.NoteType.Common:
+                m_redAndBlueNote.RenderRedAndBlueNoteItem(this, StageData.NoteData.NoteType.Common);
+
+                m_greenNote.gameObject.SetActive(false);
+                break;
+
+            case StageData.NoteData.NoteType.Flip:
+                m_redAndBlueNote.RenderRedAndBlueNoteItem(this, StageData.NoteData.NoteType.Flip);
+
+                m_greenNote.gameObject.SetActive(false);
+                break;
+
+            case StageData.NoteData.NoteType.Long:
+                m_greenNote.RenderGreenNoteItem(this);
+
+                m_redAndBlueNote.gameObject.SetActive(false);
+                break;
+        }
+    }
+
+    internal void HitNote()
+    {
+        ScoreManager.Instance.PushNoteCandidate(m_noteID);
+    }
+
+    internal float GetNoteXPos(in float targetFrame, in Guid attachedLineID)
+    {
+        float NoteYPos = GridRenderManager.Instance.GetFramePosition(targetFrame) +
+                         GridRenderManager.Instance.GetFramePosition(StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[StageDataBuffer.Instance.CurStageData.Value.LineDataTable[attachedLineID].AttachedRegionID].StartOffsetFrame);
+        //Debug.Log("NoteYPos : " + NoteYPos);
+
+        List<int> nearestLinePosIndexes = new List<int>(2);
+        LineRenderer attachedLineRenderer = LineEditScreenManager.Instance.GetLineItem(StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteID].AttachedLineID).LineRenderer;
+
+        // For Blue Line
+        if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[StageDataBuffer.Instance.CurStageData.Value.LineDataTable[attachedLineID].AttachedRegionID].CurColorType == StageData.RegionData.ColorType.Blue)
+        {
+            return attachedLineRenderer.GetPosition(0).x;
+        }
+
+        for (int index = 0; index < attachedLineRenderer.positionCount; index++)
+        {
+            if(attachedLineRenderer.GetPosition(index).y == NoteYPos)
+            {
+                return attachedLineRenderer.GetPosition(index).x;
+            }
+        }
+
+        // Most nearest line pos
+        int curNearestLinePosIndex = -1;
+        //Debug.Log("attachedLineRenderer.positionCount : " + attachedLineRenderer.positionCount);
+        float curNearestLinePos = float.MaxValue;
+        for (int linePosIndex = 0; linePosIndex < attachedLineRenderer.positionCount; linePosIndex++)
+        {
+            float linePos = attachedLineRenderer.GetPosition(linePosIndex).y;
+            if(linePos > NoteYPos && Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
+            {
+                curNearestLinePosIndex = linePosIndex;
+                curNearestLinePos = linePos;
+            }
+
+            //if (Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
+            //{
+            //    curNearestLinePosIndex = linePosIndex;
+            //    curNearestLinePos = linePos;
+            //}
+        }
+        nearestLinePosIndexes.Add(curNearestLinePosIndex);
+
+        if(Mathf.Abs(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).y - NoteYPos) == 0)
+        {
+            //Debug.Log("attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x : " + attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x);
+            return attachedLineRenderer.GetPosition(curNearestLinePosIndex).x;
+        }
+
+        // Second nearest line pos
+        curNearestLinePosIndex = -1;
+        curNearestLinePos = float.MaxValue;
+        for (int linePosIndex = 0; linePosIndex < attachedLineRenderer.positionCount; linePosIndex++)
+        {
+            if(nearestLinePosIndexes.Contains(linePosIndex))
+            {
+                continue;
+            }
+
+            float linePos = attachedLineRenderer.GetPosition(linePosIndex).y;
+            if (linePos < NoteYPos && Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
+            {
+                curNearestLinePosIndex = linePosIndex;
+                curNearestLinePos = linePos;
+            }
+
+            //if (Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
+            //{
+            //    curNearestLinePosIndex = linePosIndex;
+            //    curNearestLinePos = linePos;
+            //}
+        }
+        nearestLinePosIndexes.Add(curNearestLinePosIndex);
+
+        //string log = "nearestLinePosIndexes : ";
+        //for (int index = 0; index < nearestLinePosIndexes.Count; index++)
+        //{
+        //    log += attachedLineRenderer.GetPosition(nearestLinePosIndexes[index]).y + " ";
+        //}
+        //Debug.Log(log);
+
+        //if (nearestLinePosIndexes[0] == nearestLinePosIndexes[1])
+        //{
+        //    return attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x;
+        //}
+
+        // Mathf.Lerp를 사용하기 위한 준비
+        float[] nearestLinePosGaps = new float[2];
+        for (int index = 0; index < nearestLinePosIndexes.Count; index++)
+        {
+            nearestLinePosGaps[index] = MathF.Abs(attachedLineRenderer.GetPosition(nearestLinePosIndexes[index]).y - NoteYPos);
+        }
+
+        //string log = "nearestLinePosGaps : ";
+        //for (int index = 0; index < nearestLinePosGaps.Length; index++)
+        //{
+        //    log += nearestLinePosGaps[index] + " ";
+        //}
+        //Debug.Log(log);
+
+        //int minIndex = (attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x < attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x) ? 0 : 1;
+        //int maxIndex = (minIndex == 0) ? 1 : 0;
+
+        //return attachedLineRenderer.GetPosition(nearestLinePosIndexes[minIndex]).x + (attachedLineRenderer.GetPosition(nearestLinePosIndexes[maxIndex]).x - attachedLineRenderer.GetPosition(nearestLinePosIndexes[minIndex]).x) * (nearestLinePosGaps[minIndex] / (nearestLinePosGaps[minIndex] + nearestLinePosGaps[maxIndex]));
+
+        //Debug.Log(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x + ", " + attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x + " - " + (nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
+
+        //Debug.Log((nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
+        return Mathf.Lerp(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x,
+                          attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x,
+                          (nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
+
+        //return (attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x + attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x) / 2.0f;
+    }
+    #endregion
+}
