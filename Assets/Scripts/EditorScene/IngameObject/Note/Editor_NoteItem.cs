@@ -100,7 +100,6 @@ public class Editor_NoteItem : MonoBehaviour
 
         // Most nearest line pos
         int curNearestLinePosIndex = -1;
-        //Debug.Log("attachedLineRenderer.positionCount : " + attachedLineRenderer.positionCount);
         float curNearestLinePos = float.MaxValue;
         for (int linePosIndex = 0; linePosIndex < attachedLineRenderer.positionCount; linePosIndex++)
         {
@@ -110,18 +109,11 @@ public class Editor_NoteItem : MonoBehaviour
                 curNearestLinePosIndex = linePosIndex;
                 curNearestLinePos = linePos;
             }
-
-            //if (Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
-            //{
-            //    curNearestLinePosIndex = linePosIndex;
-            //    curNearestLinePos = linePos;
-            //}
         }
         nearestLinePosIndexes.Add(curNearestLinePosIndex);
 
         if(Mathf.Abs(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).y - NoteYPos) == 0)
         {
-            //Debug.Log("attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x : " + attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x);
             return attachedLineRenderer.GetPosition(curNearestLinePosIndex).x;
         }
 
@@ -141,26 +133,8 @@ public class Editor_NoteItem : MonoBehaviour
                 curNearestLinePosIndex = linePosIndex;
                 curNearestLinePos = linePos;
             }
-
-            //if (Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
-            //{
-            //    curNearestLinePosIndex = linePosIndex;
-            //    curNearestLinePos = linePos;
-            //}
         }
         nearestLinePosIndexes.Add(curNearestLinePosIndex);
-
-        //string log = "nearestLinePosIndexes : ";
-        //for (int index = 0; index < nearestLinePosIndexes.Count; index++)
-        //{
-        //    log += attachedLineRenderer.GetPosition(nearestLinePosIndexes[index]).y + " ";
-        //}
-        //Debug.Log(log);
-
-        //if (nearestLinePosIndexes[0] == nearestLinePosIndexes[1])
-        //{
-        //    return attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x;
-        //}
 
         // Mathf.Lerp를 사용하기 위한 준비
         float[] nearestLinePosGaps = new float[2];
@@ -169,26 +143,9 @@ public class Editor_NoteItem : MonoBehaviour
             nearestLinePosGaps[index] = MathF.Abs(attachedLineRenderer.GetPosition(nearestLinePosIndexes[index]).y - NoteYPos);
         }
 
-        //string log = "nearestLinePosGaps : ";
-        //for (int index = 0; index < nearestLinePosGaps.Length; index++)
-        //{
-        //    log += nearestLinePosGaps[index] + " ";
-        //}
-        //Debug.Log(log);
-
-        //int minIndex = (attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x < attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x) ? 0 : 1;
-        //int maxIndex = (minIndex == 0) ? 1 : 0;
-
-        //return attachedLineRenderer.GetPosition(nearestLinePosIndexes[minIndex]).x + (attachedLineRenderer.GetPosition(nearestLinePosIndexes[maxIndex]).x - attachedLineRenderer.GetPosition(nearestLinePosIndexes[minIndex]).x) * (nearestLinePosGaps[minIndex] / (nearestLinePosGaps[minIndex] + nearestLinePosGaps[maxIndex]));
-
-        //Debug.Log(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x + ", " + attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x + " - " + (nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
-
-        //Debug.Log((nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
         return Mathf.Lerp(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x,
                           attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x,
                           (nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
-
-        //return (attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x + attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x) / 2.0f;
     }
     #endregion
 }

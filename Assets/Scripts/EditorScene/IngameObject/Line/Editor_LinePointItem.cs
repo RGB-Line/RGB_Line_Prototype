@@ -238,9 +238,10 @@ public class Editor_LinePointItem : MonoBehaviour
             m_lineItem.RenderLineItem(m_lineItem.LineID);
         }
 
-        if(Input.GetKeyDown(KeyCode.KeypadPlus) &&
+        float minorSetStep = GridRenderManager.Instance.GetUnitFramePosition() * MenuPopup_MusicDetail.Instance.MinorSetStep;
+        if (Input.GetKeyDown(KeyCode.KeypadPlus) &&
             StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].CurvedLinePoints[realPointIndex].Y + 1 <= LineEditScreenManager.Instance.GetCurLineMaxFrameCount() &&
-            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] + 0.05f <= 0.5f)
+            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] + minorSetStep <= 0.5f)
         {
             if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[RegionEditScreenManager.Instance.SelectedRegionID].CurColorType != StageData.RegionData.ColorType.Blue &&
                 realPointIndex == 0)
@@ -248,13 +249,13 @@ public class Editor_LinePointItem : MonoBehaviour
                 return;
             }
 
-            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] += 0.05f;
+            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] += minorSetStep;
 
             m_lineItem.RenderLineItem(m_lineItem.LineID);
         }
         else if(Input.GetKeyDown(KeyCode.KeypadMinus) &&
             StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].CurvedLinePoints[realPointIndex].Y - 1 >= 0 &&
-            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] - 0.05f >= -0.5f)
+            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] - minorSetStep >= -0.5f)
         {
             if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[RegionEditScreenManager.Instance.SelectedRegionID].CurColorType != StageData.RegionData.ColorType.Blue &&
                 realPointIndex == StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].CurvedLinePoints.Count - 1)
@@ -262,7 +263,7 @@ public class Editor_LinePointItem : MonoBehaviour
                 return;
             }
 
-            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] -= 0.05f;
+            StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].MinorOffsetTimes[realPointIndex] -= minorSetStep;
 
             m_lineItem.RenderLineItem(m_lineItem.LineID);
         }

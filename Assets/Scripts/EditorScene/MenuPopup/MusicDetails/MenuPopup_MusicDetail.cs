@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,19 +48,35 @@ public class MenuPopup_MusicDetail : MonoBehaviour
     }
 
 
+    private static MenuPopup_MusicDetail m_instance;
+
     [SerializeField] private LoadPathUI m_loadPathUI;
     [SerializeField] private MusicDetailUI m_musicDetailUI;
+
+    [SerializeField] private TMP_Dropdown m_dropdown_MinorSetStep;
 
     private string m_targetMusicFilePath;
     private string m_targetMusicFileExtension;
 
 
+    public void Awake()
+    {
+        m_instance = this;
+    }
     public void Start()
     {
         Setup2MusicUnLoaded();
     }
 
     #region Properties
+    internal static MenuPopup_MusicDetail Instance
+    {
+        get
+        {
+            return m_instance;
+        }
+    }
+
     internal string MusicTitle
     {
         get
@@ -87,6 +104,14 @@ public class MenuPopup_MusicDetail : MonoBehaviour
         get
         {
             return m_loadPathUI.m_text_LoadMusicState;
+        }
+    }
+
+    internal float MinorSetStep
+    {
+        get
+        {
+            return 1.0f / (m_dropdown_MinorSetStep.value + 2);
         }
     }
     #endregion
@@ -340,21 +365,22 @@ public class MenuPopup_MusicDetail : MonoBehaviour
             return;
         }
 
-        //if(StageDataBuffer.Instance.CurStageData.Value.RegionDataTable.Count > 0 ||
-        //    StageDataBuffer.Instance.CurStageData.Value.LineDataTable.Count > 0)
-        //{
-        //    LoggingManager.Instance.AssertLogMessage(LoggingManager.LogType.Error, "Can't change bit sub division property while some region or line item's exist");
-        //    return;
-        //}
+        if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable.Count > 0 ||
+            StageDataBuffer.Instance.CurStageData.Value.LineDataTable.Count > 0)
+        {
+            LoggingManager.Instance.AssertLogMessage(LoggingManager.LogType.Error, "Can't change bit sub division property while some region or line item's exist");
+            return;
+        }
 
         if (int.TryParse(m_musicDetailUI.m_inputField_BitSubDivision.text, out int bitSubDivision))
         {
             // Check if bit sub division is power of 2
-            if (bitSubDivision > 0 && (bitSubDivision & (bitSubDivision - 1)) == 0)
+            if (!(bitSubDivision > 0 && (bitSubDivision & (bitSubDivision - 1)) == 0))
             {
-
+                m_musicDetailUI.m_inputField_BitSubDivision.text = StageDataBuffer.Instance.CurStageData.Value.StageConfig.BitSubDivision.ToString();
             }
 
+            int prevBitSubDivision = StageDataBuffer.Instance.CurStageData.Value.StageConfig.BitSubDivision;
             StageDataBuffer.Instance.CurStageData = new StageData()
             {
                 RegionDataTable = StageDataBuffer.Instance.CurStageData.Value.RegionDataTable,
@@ -368,6 +394,49 @@ public class MenuPopup_MusicDetail : MonoBehaviour
                     MusicStartOffsetTime = StageDataBuffer.Instance.CurStageData.Value.StageConfig.MusicStartOffsetTime
                 }
             };
+
+            Debug.Log(bitSubDivision / prevBitSubDivision);
+
+            //// Update Region Data
+            //for (int regionIndex = 0; regionIndex < StageDataBuffer.Instance.CurStageData.Value.RegionDataTable.Count; regionIndex++)
+            //{
+            //    Guid regionID = StageDataBuffer.Instance.CurStageData.Value.RegionDataTable.Keys.ElementAt(regionIndex);
+            //    StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[regionID] = new StageData.RegionData()
+            //    {
+            //        StartOffsetFrame = (int)(StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[regionID].StartOffsetFrame * (bitSubDivision / (float)prevBitSubDivision)),
+            //        MinorOffsetTime = StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[regionID].MinorOffsetTime,
+            //        CurColorType = StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[regionID].CurColorType
+            //    };
+            //}
+
+            //// Update line Data
+            //for (int lineIndex = 0; lineIndex < StageDataBuffer.Instance.CurStageData.Value.LineDataTable.Count; lineIndex++)
+            //{
+            //    Guid lineID = StageDataBuffer.Instance.CurStageData.Value.LineDataTable.Keys.ElementAt(lineIndex);
+            //    for (int pointIndex = 0; pointIndex < StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].CurvedLinePoints.Count; pointIndex++)
+            //    {
+            //        StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].CurvedLinePoints[pointIndex] = new HalfFloatVector2()
+            //        {
+            //            X = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].CurvedLinePoints[pointIndex].X,
+            //            Y = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].CurvedLinePoints[pointIndex].Y * (prevBitSubDivision / bitSubDivision)
+            //        };
+            //    }
+            //}
+
+            //// Update Note Data
+            //for(int noteIndex = 0; noteIndex < StageDataBuffer.Instance.CurStageData.Value.NoteDataTable.Count; noteIndex++)
+            //{
+            //    Guid noteID = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable.Keys.ElementAt(noteIndex);
+            //    StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID] = new StageData.NoteData()
+            //    {
+            //        AttachedLineID = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].AttachedLineID,
+            //        StartOffsetFrame = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].StartOffsetFrame * (prevBitSubDivision / bitSubDivision),
+            //        MinorOffsetTime = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].MinorOffsetTime,
+            //        NoteLength = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].NoteLength,
+            //        flipNoteDirection = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].flipNoteDirection,
+            //        CurNoteType = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[noteID].CurNoteType
+            //    };
+            //}
 
             GridRenderManager.Instance.RenderGrid();
             RegionEditScreenManager.Instance.Render();

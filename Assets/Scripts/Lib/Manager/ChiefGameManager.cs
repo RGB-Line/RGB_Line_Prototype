@@ -36,6 +36,9 @@ public sealed class ChiefGameManager : MonoBehaviour
     //[Header("Game Config Data")]
     //[SerializeField] private GameConfigData m_gameConfigData;
 
+    [SerializeField] private Transform m_transform_Tracker;
+    private Dictionary<Guid, float> regionTimeTable = new Dictionary<Guid, float>();
+
 
     public void Awake()
     {
@@ -50,6 +53,72 @@ public sealed class ChiefGameManager : MonoBehaviour
         if (m_bisMusicPlaying)
         {
             m_outerUI.m_slider_TimeMover.value = m_audioSource.time / (m_audioSource.clip.length - StageDataBuffer.Instance.CurStageData.Value.StageConfig.MusicStartOffsetTime);
+
+            Guid curRegionID = Guid.Empty;
+            foreach (Guid regionID in regionTimeTable.Keys)
+            {
+                if (m_transform_Tracker.position.y >= regionTimeTable[regionID])
+                {
+                    curRegionID = regionID;
+                }
+            }
+
+            if (curRegionID != Guid.Empty)
+            {
+                if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[curRegionID].CurColorType == StageData.RegionData.ColorType.Red)
+                {
+                    Guid redLineID = Guid.Empty;
+                    foreach (Guid lineID in StageDataBuffer.Instance.CurStageData.Value.LineDataTable.Keys)
+                    {
+                        if (StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].AttachedRegionID == curRegionID)
+                        {
+                            redLineID = lineID;
+                            break;
+                        }
+                    }
+
+                    float xPos = GetCameraXPos(m_transform_Tracker.position.y / GridRenderManager.Instance.GetUnitFramePosition(), redLineID);
+                    m_rigidbody2D_MainCamera.position = new Vector2(xPos, m_rigidbody2D_MainCamera.position.y);
+
+                    m_transform_Tracker.gameObject.SetActive(true);
+                    m_transform_Tracker.localPosition = new Vector3()
+                    {
+                        x = 0.0f,
+                        y = -3.5f,
+                        z = 5.0f
+                    };
+                }
+                else if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[curRegionID].CurColorType == StageData.RegionData.ColorType.Green)
+                {
+                    Guid greenLineID = Guid.Empty;
+                    foreach (Guid lineID in StageDataBuffer.Instance.CurStageData.Value.LineDataTable.Keys)
+                    {
+                        if (StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].AttachedRegionID == curRegionID)
+                        {
+                            greenLineID = lineID;
+                            break;
+                        }
+                    }
+
+                    m_transform_Tracker.gameObject.SetActive(true);
+                    m_transform_Tracker.localPosition = new Vector3()
+                    {
+                        x = GetCameraXPos(m_transform_Tracker.position.y / GridRenderManager.Instance.GetUnitFramePosition(), greenLineID),
+                        y = -3.5f,
+                        z = 5.0f
+                    };
+                }
+                else if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[curRegionID].CurColorType == StageData.RegionData.ColorType.Blue)
+                {
+                    m_transform_Tracker.gameObject.SetActive(false);
+                    m_transform_Tracker.localPosition = new Vector3()
+                    {
+                        x = 0.0f,
+                        y = -3.5f,
+                        z = 5.0f
+                    };
+                }
+            }
 
             if (m_audioSource.time >= m_audioSource.clip.length)
             {
@@ -143,6 +212,13 @@ public sealed class ChiefGameManager : MonoBehaviour
         }
         else
         {
+            regionTimeTable.Clear();
+            foreach (Guid regionID in StageDataBuffer.Instance.CurStageData.Value.RegionDataTable.Keys)
+            {
+                regionTimeTable.Add(regionID, GridRenderManager.Instance.GetFramePosition(StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[regionID].StartOffsetFrame + StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[regionID].MinorOffsetTime));
+                //Debug.Log($"Region ID: {regionID}, Time: {regionTimeTable[regionID]}");
+            }
+
             m_audioSource.time = StageDataBuffer.Instance.CurStageData.Value.StageConfig.MusicStartOffsetTime;
             m_audioSource.Play();
 
@@ -190,6 +266,78 @@ public sealed class ChiefGameManager : MonoBehaviour
         m_outerUI.m_button_RegionMode.interactable = true;
         m_outerUI.m_button_LineMode.interactable = true;
         m_outerUI.m_button_NoteMode.interactable = true;
+    }
+
+    private float GetCameraXPos(in float targetFrame, in Guid lineID)
+    {
+        float NoteYPos = GridRenderManager.Instance.GetFramePosition(targetFrame);
+        //Debug.Log("NoteYPos : " + NoteYPos);
+
+        List<int> nearestLinePosIndexes = new List<int>(2);
+        LineRenderer attachedLineRenderer = LineEditScreenManager.Instance.GetLineItem(lineID).LineRenderer;
+
+        //// For Blue Line
+        //if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[StageDataBuffer.Instance.CurStageData.Value.LineDataTable[attachedLineID].AttachedRegionID].CurColorType == StageData.RegionData.ColorType.Blue)
+        //{
+        //    return attachedLineRenderer.GetPosition(0).x;
+        //}
+
+        //for (int index = 0; index < attachedLineRenderer.positionCount; index++)
+        //{
+        //    if (attachedLineRenderer.GetPosition(index).y == NoteYPos)
+        //    {
+        //        return attachedLineRenderer.GetPosition(index).x;
+        //    }
+        //}
+
+        // Most nearest line pos
+        int curNearestLinePosIndex = -1;
+        float curNearestLinePos = float.MaxValue;
+        for (int linePosIndex = 0; linePosIndex < attachedLineRenderer.positionCount; linePosIndex++)
+        {
+            float linePos = attachedLineRenderer.GetPosition(linePosIndex).y;
+            if (linePos > NoteYPos && Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
+            {
+                curNearestLinePosIndex = linePosIndex;
+                curNearestLinePos = linePos;
+            }
+        }
+        nearestLinePosIndexes.Add(curNearestLinePosIndex);
+
+        if (Mathf.Abs(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).y - NoteYPos) == 0)
+        {
+            return attachedLineRenderer.GetPosition(curNearestLinePosIndex).x;
+        }
+
+        // Second nearest line pos
+        curNearestLinePosIndex = -1;
+        curNearestLinePos = float.MaxValue;
+        for (int linePosIndex = 0; linePosIndex < attachedLineRenderer.positionCount; linePosIndex++)
+        {
+            if (nearestLinePosIndexes.Contains(linePosIndex))
+            {
+                continue;
+            }
+
+            float linePos = attachedLineRenderer.GetPosition(linePosIndex).y;
+            if (linePos < NoteYPos && Mathf.Abs(linePos - NoteYPos) < Mathf.Abs(curNearestLinePos - NoteYPos))
+            {
+                curNearestLinePosIndex = linePosIndex;
+                curNearestLinePos = linePos;
+            }
+        }
+        nearestLinePosIndexes.Add(curNearestLinePosIndex);
+
+        // Mathf.Lerp를 사용하기 위한 준비
+        float[] nearestLinePosGaps = new float[2];
+        for (int index = 0; index < nearestLinePosIndexes.Count; index++)
+        {
+            nearestLinePosGaps[index] = MathF.Abs(attachedLineRenderer.GetPosition(nearestLinePosIndexes[index]).y - NoteYPos);
+        }
+
+        return Mathf.Lerp(attachedLineRenderer.GetPosition(nearestLinePosIndexes[0]).x,
+                          attachedLineRenderer.GetPosition(nearestLinePosIndexes[1]).x,
+                          (nearestLinePosGaps[0] / (nearestLinePosGaps[0] + nearestLinePosGaps[1])));
     }
     #endregion
 }

@@ -453,6 +453,7 @@ public class LineEditScreenManager : MonoBehaviour
                 //StartOffsetFrame = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_selectedLineID].StartOffsetFrame,
                 //EndOffsetFrame = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_selectedLineID].EndOffsetFrame,
                 CurvedLinePoints = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_selectedLineID].CurvedLinePoints,
+                MinorOffsetTimes = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_selectedLineID].MinorOffsetTimes,
                 LineWidth = lineWidth,
                 CurLineSmoothType = StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_selectedLineID].CurLineSmoothType
             };

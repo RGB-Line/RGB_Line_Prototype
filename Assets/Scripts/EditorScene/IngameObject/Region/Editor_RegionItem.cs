@@ -65,20 +65,23 @@ public class Editor_RegionItem : MonoBehaviour
     {
         float realStartPos = startFrame + startMinorOffsetTime;
         float realEndPos = endFrame + endMinorOffsetTime;
+
+        float bitSubDivision = StageDataBuffer.Instance.CurStageData.Value.StageConfig.BitSubDivision;
+        bitSubDivision /= 4.0f;
         if (startFrame == 0)
         {
-            transform.localScale = new Vector3(200.0f, (realEndPos - realStartPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 4.0f * 2.0f, 1);
-            transform.position = new Vector3(0, (realStartPos + realEndPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 8.0f - transform.localScale.y / 4.0f, 0);
+            transform.localScale = new Vector3(200.0f, (realEndPos - realStartPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 4.0f * 2.0f / bitSubDivision, 1);
+            transform.position = new Vector3(0, (realStartPos + realEndPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / (2.0f * 4.0f) / bitSubDivision - transform.localScale.y / 4.0f, 0);
         }
-        else if(endFrame == GridRenderManager.Instance.GetTotalBitCount())
+        else if (endFrame == GridRenderManager.Instance.GetTotalBitCount())
         {
-            transform.localScale = new Vector3(200.0f, (realEndPos - realStartPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 4.0f * 2.0f, 1);
-            transform.position = new Vector3(0, (realStartPos + realEndPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 8.0f + transform.localScale.y / 4.0f, 0);
+            transform.localScale = new Vector3(200.0f, (realEndPos - realStartPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 4.0f * 2.0f / bitSubDivision, 1);
+            transform.position = new Vector3(0, (realStartPos + realEndPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / (2.0f * 4.0f) / bitSubDivision + transform.localScale.y / 4.0f, 0);
         }
         else
         {
-            transform.localScale = new Vector3(200.0f, (realEndPos - realStartPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 4.0f, 1);
-            transform.position = new Vector3(0, (realStartPos + realEndPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 8.0f, 0);
+            transform.localScale = new Vector3(200.0f, (realEndPos - realStartPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / 4.0f / bitSubDivision, 1);
+            transform.position = new Vector3(0, (realStartPos + realEndPos) * StageDataBuffer.Instance.CurStageData.Value.StageConfig.LengthPerBit / (2.0f * 4.0f) / bitSubDivision, 0);
         }
 
         if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[m_regionID].CurColorType == StageData.RegionData.ColorType.Green)

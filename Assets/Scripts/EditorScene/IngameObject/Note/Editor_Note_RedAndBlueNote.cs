@@ -34,14 +34,15 @@ public class Editor_Note_RedAndBlueNote : MonoBehaviour
             return;
         }
 
+        float minorSetStep = GridRenderManager.Instance.GetUnitFramePosition() * MenuPopup_MusicDetail.Instance.MinorSetStep;
         if (Input.GetKeyDown(KeyCode.UpArrow) &&
-            StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime + 0.05f <= 0.5f)
+            StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime + minorSetStep <= 0.5f)
         {
             StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID] = new StageData.NoteData()
             {
                 AttachedLineID = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].AttachedLineID,
                 StartOffsetFrame = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].StartOffsetFrame,
-                MinorOffsetTime = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime + 0.05f,
+                MinorOffsetTime = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime + minorSetStep,
                 NoteLength = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].NoteLength,
                 flipNoteDirection = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].flipNoteDirection,
                 CurNoteType = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].CurNoteType
@@ -50,13 +51,13 @@ public class Editor_Note_RedAndBlueNote : MonoBehaviour
             m_noteItem.RenderNoteItem(m_noteItem.NoteID);
         }
         else if(Input.GetKeyDown(KeyCode.DownArrow) &&
-            StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime - 0.05f >= -0.5f)
+            StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime - minorSetStep >= -0.5f)
         {
             StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID] = new StageData.NoteData()
             {
                 AttachedLineID = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].AttachedLineID,
                 StartOffsetFrame = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].StartOffsetFrame,
-                MinorOffsetTime = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime - 0.05f,
+                MinorOffsetTime = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].MinorOffsetTime - minorSetStep,
                 NoteLength = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].NoteLength,
                 flipNoteDirection = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].flipNoteDirection,
                 CurNoteType = StageDataBuffer.Instance.CurStageData.Value.NoteDataTable[m_noteItem.NoteID].CurNoteType
