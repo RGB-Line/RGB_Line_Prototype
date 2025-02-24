@@ -114,6 +114,13 @@ public class LineEditScreenManager : MonoBehaviour
             return m_selectedMode;
         }
     }
+    internal Transform LineParent
+    {
+        get
+        {
+            return m_transform_LineItemParent;
+        }
+    }
 
     #region Unity UI Callbacks
     // LineItemUI

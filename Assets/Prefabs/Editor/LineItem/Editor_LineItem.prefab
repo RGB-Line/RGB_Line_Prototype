@@ -180,6 +180,8 @@ MonoBehaviour:
     m_material_RedLine: {fileID: 2100000, guid: 510ef6450126b6442bd2fa8145d3dddd, type: 2}
     m_material_GreenLine: {fileID: 2100000, guid: 4ecadc07c4d78ba4ca36e1fb39fc2a66, type: 2}
     m_material_BlueLine: {fileID: 2100000, guid: c5accd0d58e17b14a87763df92834511, type: 2}
+    m_material_Outline: {fileID: 2100000, guid: f515dfce52233214cbe0f9a75abe6c7b, type: 2}
+    m_material_DashLine: {fileID: 2100000, guid: 11053f295d737ab4ab9d0d55b8a0fcb9, type: 2}
     m_material_RedLine_Editor: {fileID: 2100000, guid: e9f5da7d4ec498145a74d98bc66bc277, type: 2}
     m_material_GreenLine_Editor: {fileID: 2100000, guid: c81bab798bdd9fc488316b38c810dfce, type: 2}
     m_material_BlueLine_Editor: {fileID: 2100000, guid: 8a7130430543a9847acc03efdf2491ab, type: 2}

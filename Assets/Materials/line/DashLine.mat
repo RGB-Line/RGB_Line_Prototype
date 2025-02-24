@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: RegionFadeoutMat
-  m_Shader: {fileID: 4800000, guid: 16cb81f3eea8dec4fb212bb65d90686f, type: 3}
+  m_Name: DashLine
+  m_Shader: {fileID: 4800000, guid: a2b1a1f70de62a845ac4f6a6a5204fa7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -41,16 +41,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DeterminLinePos: 0.2
-    - _EffectStartPos_X: 0
-    - _EffectStartPos_Y: 0
     - _EnableExternalAlpha: 0
-    - _Radius: 0
-    - _ShapeFactor: 1.95
+    - _Interval: 30
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
-    - _PrevBaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

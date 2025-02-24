@@ -5,6 +5,7 @@ using System.Linq;
 
 using UnityEngine;
 using static StageData;
+using static UnityEditor.PlayerSettings;
 
 
 public class Editor_LineItem : MonoBehaviour, IDisposable
@@ -15,6 +16,9 @@ public class Editor_LineItem : MonoBehaviour, IDisposable
         public Material m_material_RedLine;
         public Material m_material_GreenLine;
         public Material m_material_BlueLine;
+
+        public Material m_material_Outline;
+        public Material m_material_DashLine;
 
         [Header("Line Material Editor")]
         public Material m_material_RedLine_Editor;
@@ -144,6 +148,7 @@ public class Editor_LineItem : MonoBehaviour, IDisposable
 
         Dispose();
 
+        // Outer Line
         List<HalfFloatVector2> points = (StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].CurvedLinePoints.ToArray().Clone() as HalfFloatVector2[]).ToList();
         List<float> minorOffsetTimes = (StageDataBuffer.Instance.CurStageData.Value.LineDataTable[lineID].MinorOffsetTimes.ToArray().Clone() as float[]).ToList();
         if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineID].AttachedRegionID].CurColorType == StageData.RegionData.ColorType.Green)
@@ -165,7 +170,7 @@ public class Editor_LineItem : MonoBehaviour, IDisposable
             minorOffsetTimes.Add(0.0f);
         }
 
-        for(int index = 0; index < points.Count; index++)
+        for (int index = 0; index < points.Count; index++)
         {
             Editor_LinePointItem linePointItem = Instantiate(m_prefab_LinePoint, transform).GetComponent<Editor_LinePointItem>();
 
@@ -227,6 +232,9 @@ public class Editor_LineItem : MonoBehaviour, IDisposable
         m_lineRenderer.alignment = LineAlignment.TransformZ;
 
         DrawLineItem();
+
+        Invoke("RenderOutline", 0.5f);
+        Invoke("RenderCenterLine", 0.5f);
 
         Invoke("RenderNoteScreen", 1.0f);
     }
@@ -292,6 +300,48 @@ public class Editor_LineItem : MonoBehaviour, IDisposable
     private void RenderNoteScreen()
     {
         NoteEditScreenManager.Instance.Render();
+    }
+    private void RenderOutline()
+    {
+        if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineID].AttachedRegionID].CurColorType == StageData.RegionData.ColorType.Green)
+        {
+            GameObject outline = new GameObject("Outline");
+            outline.transform.SetParent(LineEditScreenManager.Instance.LineParent);
+
+            LineRenderer outlineRenderer = outline.AddComponent<LineRenderer>();
+            outlineRenderer.material = m_materials.m_material_Outline;
+            outlineRenderer.positionCount = m_lineRenderer.positionCount;
+            outlineRenderer.sortingOrder = 100;
+            outlineRenderer.numCapVertices = 90;
+
+            Vector3[] positions = new Vector3[m_lineRenderer.positionCount];
+            m_lineRenderer.GetPositions(positions);
+            outlineRenderer.SetPositions(positions);
+
+            outlineRenderer.startWidth = m_lineRenderer.startWidth - 0.3f;
+            outlineRenderer.endWidth = m_lineRenderer.endWidth - 0.3f;
+        }
+    }
+    private void RenderCenterLine()
+    {
+        if (StageDataBuffer.Instance.CurStageData.Value.RegionDataTable[StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineID].AttachedRegionID].CurColorType == StageData.RegionData.ColorType.Green)
+        {
+            GameObject centerLine = new GameObject("CenterLine");
+            centerLine.transform.SetParent(LineEditScreenManager.Instance.LineParent);
+
+            LineRenderer centerlineRenderer = centerLine.AddComponent<LineRenderer>();
+            centerlineRenderer.material = m_materials.m_material_DashLine;
+            centerlineRenderer.positionCount = m_lineRenderer.positionCount;
+            centerlineRenderer.sortingOrder = 100;
+            centerlineRenderer.numCapVertices = 90;
+
+            Vector3[] positions = new Vector3[m_lineRenderer.positionCount];
+            m_lineRenderer.GetPositions(positions);
+            centerlineRenderer.SetPositions(positions);
+
+            centerlineRenderer.startWidth = 0.04f;
+            centerlineRenderer.endWidth = 0.04f;
+        }
     }
     #endregion
 }

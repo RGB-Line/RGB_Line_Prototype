@@ -1,17 +1,15 @@
-Shader "RGBLine/TopEdgyBlur"
+Shader "RGBLine/DashLine"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-
-        _BaseColor ("BaseColor", Color) = (1,1,1,1)
+        _Interval ("Interval", Range(0, 1000)) = 500
     }
     SubShader
     {
         Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
         ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha
-        // Tags { "RenderType"="Opaque" }
         LOD 100
 
         Pass
@@ -32,6 +30,8 @@ Shader "RGBLine/TopEdgyBlur"
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+
+                float scaledSize : TEXCOORD1;
             };
 
             sampler2D _MainTex;
@@ -39,25 +39,26 @@ Shader "RGBLine/TopEdgyBlur"
 
             fixed4 _MainTex_TexelSize;
 
-            fixed4 _BaseColor;
+            float _Interval;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.scaledSize = int(ceil(_MainTex_TexelSize.x * _Interval));
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float mx = max(_MainTex_TexelSize.z, _MainTex_TexelSize.w);
-                fixed2 uv = i.uv / mx;
-                fixed3 color = fixed3(uv, 0.25f + 0.5f * sin(_Time.y));
-                
-                color = lerp(color, _BaseColor, 0.7f);
+                float hash = float(0.0);
+                if(int(i.uv.x * i.scaledSize) % 2 == 0)
+                {
+                    hash = 1.0;
+                }
 
-                return fixed4(color, saturate(uv.y + 0.05f));
+                return fixed4(hash, hash, hash, hash);
             }
             ENDCG
         }

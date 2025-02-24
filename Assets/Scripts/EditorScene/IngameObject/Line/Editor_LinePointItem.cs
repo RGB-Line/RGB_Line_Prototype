@@ -302,16 +302,6 @@ public class Editor_LinePointItem : MonoBehaviour
         m_lineItem = lineItem;
         m_pointIndex = pointIndex;
 
-        //float additionalYPos = 0.0f;
-        //if (pointIndex == 0)
-        //{
-        //    additionalYPos = -1.0f;
-        //}
-        //else if (pointIndex == StageDataBuffer.Instance.CurStageData.Value.LineDataTable[m_lineItem.LineID].CurvedLinePoints.Count - 1)
-        //{
-        //    additionalYPos = +1.0f;
-        //}
-
         transform.position = new Vector3()
         {
             x = pos.x,

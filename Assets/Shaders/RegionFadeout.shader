@@ -12,6 +12,8 @@ Shader "RGBLine/RegionFadeout"
 
         _PrevBaseColor ("PrevBaseColor", Color) = (1,1,1,1)
         _BaseColor ("BaseColor", Color) = (1,1,1,1)
+
+        _ShapeFactor ("ShapeFactor", Range(1.0, 2.0)) = 1.0
     }
     SubShader
     {
@@ -53,6 +55,8 @@ Shader "RGBLine/RegionFadeout"
             fixed4 _PrevBaseColor;
             fixed4 _BaseColor;
 
+            float _ShapeFactor;
+
             float getMetaball(fixed2 a, fixed2 b);
 
             v2f vert (appdata v)
@@ -79,8 +83,8 @@ Shader "RGBLine/RegionFadeout"
                 // 1.5 - 애매한 마름도
                 // 1.2 - 프랑스 왕실 문장(백합) 느낌
                 // 1.0 - 날렵한 십자가
-                cosValue = -pow(cosValue, 0.5f) + 1.5f;
-                sinValue = -pow(sinValue, 0.5f) + 1.5f;
+                cosValue = -pow(cosValue, 0.5f) + _ShapeFactor;
+                sinValue = -pow(sinValue, 0.5f) + _ShapeFactor;
 
                 metaballValue *= max(cosValue, sinValue);
 
